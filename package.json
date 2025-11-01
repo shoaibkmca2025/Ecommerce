@@ -1,0 +1,28 @@
+{
+  "name": "cherish-india-ecommerce",
+  "version": "1.0.0",
+  "description": "Full-stack e-commerce platform for authentic Indian handcrafted products",
+  "main": "index.js",
+  "scripts": {
+    "start": "node start-servers.js",
+    "dev": "node start-dev.js",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "start:backend": "cd backend && npm run dev",
+    "start:frontend": "cd frontend && npm start",
+    "test:backend": "cd backend && npm test",
+    "seed:backend": "cd backend && npm run seed"
+  },
+  "keywords": [
+    "ecommerce",
+    "react",
+    "nodejs",
+    "mongodb",
+    "handicrafts",
+    "india"
+  ],
+  "author": "Cherish India Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
