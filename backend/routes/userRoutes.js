@@ -33,14 +33,16 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
     
-    // Create user
-    const user = await User.create({
-      name,
-      email,
-      password
-    });
-    
-    if (user) {
+    // Create user with try-catch for better error handling
+    try {
+      const user = new User({
+        name,
+        email,
+        password
+      });
+      
+      await user.save();
+      
       res.status(201).json({
         _id: user._id,
         name: user.name,
@@ -48,12 +50,16 @@ router.post('/register', async (req, res) => {
         isAdmin: user.isAdmin,
         token: generateToken(user._id)
       });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
+    } catch (createError) {
+      console.error('User creation error:', createError);
+      res.status(400).json({ 
+        message: 'Failed to create user', 
+        error: createError.message 
+      });
     }
   } catch (error) {
     console.error('User registration error:', error);
-    res.status(500).json({ message: 'Server error while registering user' });
+    res.status(500).json({ message: 'Server error while registering user', error: error.message });
   }
 });
 
