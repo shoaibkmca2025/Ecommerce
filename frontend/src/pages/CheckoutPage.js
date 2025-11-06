@@ -12,6 +12,7 @@ import './CheckoutPage.css';
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
+  const { createOrder, loading, error, clearError } = useContext(OrderContext);
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
