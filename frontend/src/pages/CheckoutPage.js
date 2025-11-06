@@ -19,12 +19,13 @@ const CheckoutPage = () => {
     firstName: user?.name?.split(' ')[0] || '',
     lastName: user?.name?.split(' ')[1] || '',
     email: user?.email || '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    paymentMethod: 'card'
+    address: user?.defaultShippingAddress?.address || '',
+    city: user?.defaultShippingAddress?.city || '',
+    state: user?.defaultShippingAddress?.state || '',
+    zipCode: user?.defaultShippingAddress?.postalCode || '',
+    country: user?.defaultShippingAddress?.country || '',
+    phone: user?.defaultShippingAddress?.phone || '',
+    paymentMethod: 'cod'
   });
   
   const [step, setStep] = useState(1);
