@@ -1,9 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
+import { OrderContext } from '../context/OrderContext';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorMessage from '../components/common/ErrorMessage';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
