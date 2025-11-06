@@ -5,6 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 const PORT = 5000; // Hardcoded to 5000
