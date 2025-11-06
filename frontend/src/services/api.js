@@ -71,6 +71,33 @@ export const userAPI = {
   updateProfile: (userData) => api.put('/users/profile', userData),
 };
 
+// Order API calls
+export const orderAPI = {
+  // Create new order
+  createOrder: (orderData) => api.post('/orders', orderData),
+
+  // Get single order
+  getOrder: (id) => api.get(`/orders/${id}`),
+
+  // Get current user's orders
+  getMyOrders: () => api.get('/orders/myorders'),
+
+  // Get all orders (admin only)
+  getAllOrders: () => api.get('/orders'),
+
+  // Update order status (admin only)
+  updateOrderStatus: (id, statusData) => api.put(`/orders/${id}/status`, statusData),
+
+  // Mark order as paid
+  updateOrderToPaid: (id, paymentResult) => api.put(`/orders/${id}/pay`, paymentResult),
+
+  // Mark order as delivered (admin only)
+  updateOrderToDelivered: (id) => api.put(`/orders/${id}/deliver`),
+
+  // Cancel order
+  cancelOrder: (id) => api.put(`/orders/${id}/cancel`),
+};
+
 // Health check
 export const healthCheck = () => api.get('/health');
 
