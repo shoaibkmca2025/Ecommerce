@@ -86,6 +86,14 @@ const Header = () => {
                   <FaUser /> {user.name}
                 </span>
                 <div className="dropdown">
+                  <Link to="/orders" onClick={() => setIsOpen(false)}>
+                    <FaBox /> My Orders
+                  </Link>
+                  {user.isAdmin && (
+                    <Link to="/admin/orders" onClick={() => setIsOpen(false)}>
+                      <FaBox /> Admin Orders
+                    </Link>
+                  )}
                   <button onClick={handleLogout}>Logout</button>
                 </div>
               </motion.div>
