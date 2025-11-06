@@ -20,6 +20,17 @@ const userSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false
+  },
+  orders: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order'
+  }],
+  defaultShippingAddress: {
+    address: String,
+    city: String,
+    postalCode: String,
+    country: String,
+    phone: String
   }
 }, {
   timestamps: true
