@@ -160,7 +160,11 @@ const CheckoutPage = () => {
     >
       <div className="container">
         <h1 className="page-title">Checkout</h1>
-        
+
+        {error && <ErrorMessage message={error} />}
+
+        {loading && <LoadingSpinner />}
+
         <div className="checkout-steps">
           <div className={`step ${step >= 1 ? 'active' : ''}`}>
             <span className="step-number">1</span>
