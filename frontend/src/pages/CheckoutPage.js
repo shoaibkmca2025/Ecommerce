@@ -1,26 +1,31 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
+import { OrderContext } from '../context/OrderContext';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorMessage from '../components/common/ErrorMessage';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
+  const { createOrder, loading, error, clearError } = useContext(OrderContext);
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
     firstName: user?.name?.split(' ')[0] || '',
     lastName: user?.name?.split(' ')[1] || '',
     email: user?.email || '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    paymentMethod: 'card'
+    address: user?.defaultShippingAddress?.address || '',
+    city: user?.defaultShippingAddress?.city || '',
+    state: user?.defaultShippingAddress?.state || '',
+    zipCode: user?.defaultShippingAddress?.postalCode || '',
+    country: user?.defaultShippingAddress?.country || '',
+    phone: user?.defaultShippingAddress?.phone || '',
+    paymentMethod: 'cod'
   });
   
   const [step, setStep] = useState(1);
@@ -30,22 +35,101 @@ const CheckoutPage = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) {
+      clearError();
+    }
   };
-  
-  const handleSubmit = (e) => {
+
+  const calculateOrderTotals = () => {
+    const subtotal = cartTotal;
+    const shippingPrice = subtotal > 0 ? 100 : 0; // Fixed shipping cost
+    const taxPrice = subtotal * 0.18; // 18% GST
+    const totalPrice = subtotal + shippingPrice + taxPrice;
+
+    return { subtotal, shippingPrice, taxPrice, totalPrice };
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (step === 1) {
       setStep(2);
     } else {
-      // Process order (would connect to backend in real app)
-      setTimeout(() => {
+      try {
+        // Validate form
+        if (!formData.address || !formData.city || !formData.zipCode || !formData.country || !formData.phone) {
+          alert('Please fill in all shipping information');
+          return;
+        }
+
+        if (!user) {
+          navigate('/login');
+          return;
+        }
+
+        const { subtotal, shippingPrice, taxPrice, totalPrice } = calculateOrderTotals();
+
+        // Prepare order data
+        const orderData = {
+          orderItems: cartItems.map(item => ({
+            product: item._id,
+            name: item.name,
+            qty: item.qty || item.quantity || 1,
+            price: item.price,
+            image: item.image
+          })),
+          shippingAddress: {
+            address: formData.address,
+            city: formData.city,
+            postalCode: formData.zipCode,
+            country: formData.country,
+            phone: formData.phone
+          },
+          paymentMethod: formData.paymentMethod,
+          taxPrice,
+          shippingPrice,
+          totalPrice
+        };
+
+        // Create order
+        const createdOrder = await createOrder(orderData);
+
+        // Clear cart
         clearCart();
-        navigate('/thank-you');
-      }, 1500);
+
+        // Navigate to order confirmation page
+        navigate(`/order-confirmation/${createdOrder._id}`);
+
+      } catch (error) {
+        console.error('Order creation failed:', error);
+        // Error is already handled by OrderContext
+      }
     }
   };
-  
+
+  // Check if user is logged in
+  if (!user) {
+    return (
+      <motion.div
+        className="checkout-page"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <div className="container">
+          <div className="login-required">
+            <h2>Login Required</h2>
+            <p>Please login to proceed with checkout.</p>
+            <Link to="/login" className="login-btn">
+              Login to Continue
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   if (cartItems.length === 0) {
     return (
       <motion.div 
@@ -76,7 +160,11 @@ const CheckoutPage = () => {
     >
       <div className="container">
         <h1 className="page-title">Checkout</h1>
-        
+
+        {error && <ErrorMessage message={error} />}
+
+        {loading && <LoadingSpinner />}
+
         <div className="checkout-steps">
           <div className={`step ${step >= 1 ? 'active' : ''}`}>
             <span className="step-number">1</span>
@@ -180,17 +268,28 @@ const CheckoutPage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="form-group">
-                    <label>Country</label>
+                    <label>Phone</label>
                     <input
-                      type="text"
-                      name="country"
-                      value={formData.country}
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
                       onChange={handleChange}
                       required
                     />
                   </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Country</label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 
                 <div className="form-actions">
@@ -319,7 +418,7 @@ const CheckoutPage = () => {
           
           <div className="order-summary">
             <h2>Order Summary</h2>
-            
+
             <div className="cart-items-summary">
               {cartItems.map(item => (
                 <div className="summary-item" key={item._id}>
@@ -327,16 +426,16 @@ const CheckoutPage = () => {
                     <img src={item.image} alt={item.name} />
                     <div>
                       <h4>{item.name}</h4>
-                      <p>Qty: {item.quantity}</p>
+                      <p>Qty: {item.qty || item.quantity || 1}</p>
                     </div>
                   </div>
                   <div className="item-price">
-                    ₹{(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * (item.qty || item.quantity || 1)).toFixed(2)}
                   </div>
                 </div>
               ))}
             </div>
-            
+
             <div className="summary-totals">
               <div className="summary-row">
                 <span>Subtotal</span>
@@ -344,11 +443,15 @@ const CheckoutPage = () => {
               </div>
               <div className="summary-row">
                 <span>Shipping</span>
-                <span>₹100.00</span>
+                <span>₹{cartTotal > 0 ? '100.00' : '0.00'}</span>
+              </div>
+              <div className="summary-row">
+                <span>Tax (18% GST)</span>
+                <span>₹{(cartTotal * 0.18).toFixed(2)}</span>
               </div>
               <div className="summary-row total">
                 <span>Total</span>
-                <span>₹{(cartTotal + 100).toFixed(2)}</span>
+                <span>₹{(cartTotal + (cartTotal > 0 ? 100 : 0) + (cartTotal * 0.18)).toFixed(2)}</span>
               </div>
             </div>
           </div>

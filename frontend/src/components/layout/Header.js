@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaBars, FaTimes, FaBox } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
 import './Header.css';
@@ -86,6 +86,14 @@ const Header = () => {
                   <FaUser /> {user.name}
                 </span>
                 <div className="dropdown">
+                  <Link to="/orders" onClick={() => setIsOpen(false)}>
+                    <FaBox /> My Orders
+                  </Link>
+                  {user.isAdmin && (
+                    <Link to="/admin/orders" onClick={() => setIsOpen(false)}>
+                      <FaBox /> Admin Orders
+                    </Link>
+                  )}
                   <button onClick={handleLogout}>Logout</button>
                 </div>
               </motion.div>
