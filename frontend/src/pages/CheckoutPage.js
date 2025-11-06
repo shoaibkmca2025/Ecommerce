@@ -35,19 +35,76 @@ const CheckoutPage = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) {
+      clearError();
+    }
   };
-  
-  const handleSubmit = (e) => {
+
+  const calculateOrderTotals = () => {
+    const subtotal = cartTotal;
+    const shippingPrice = subtotal > 0 ? 100 : 0; // Fixed shipping cost
+    const taxPrice = subtotal * 0.18; // 18% GST
+    const totalPrice = subtotal + shippingPrice + taxPrice;
+
+    return { subtotal, shippingPrice, taxPrice, totalPrice };
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (step === 1) {
       setStep(2);
     } else {
-      // Process order (would connect to backend in real app)
-      setTimeout(() => {
+      try {
+        // Validate form
+        if (!formData.address || !formData.city || !formData.zipCode || !formData.country || !formData.phone) {
+          alert('Please fill in all shipping information');
+          return;
+        }
+
+        if (!user) {
+          navigate('/login');
+          return;
+        }
+
+        const { subtotal, shippingPrice, taxPrice, totalPrice } = calculateOrderTotals();
+
+        // Prepare order data
+        const orderData = {
+          orderItems: cartItems.map(item => ({
+            product: item._id,
+            name: item.name,
+            qty: item.qty || item.quantity || 1,
+            price: item.price,
+            image: item.image
+          })),
+          shippingAddress: {
+            address: formData.address,
+            city: formData.city,
+            postalCode: formData.zipCode,
+            country: formData.country,
+            phone: formData.phone
+          },
+          paymentMethod: formData.paymentMethod,
+          taxPrice,
+          shippingPrice,
+          totalPrice
+        };
+
+        // Create order
+        const createdOrder = await createOrder(orderData);
+
+        // Clear cart
         clearCart();
-        navigate('/thank-you');
-      }, 1500);
+
+        // Navigate to order confirmation page
+        navigate(`/order-confirmation/${createdOrder._id}`);
+
+      } catch (error) {
+        console.error('Order creation failed:', error);
+        // Error is already handled by OrderContext
+      }
     }
   };
   
