@@ -242,17 +242,28 @@ const CheckoutPage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="form-group">
-                    <label>Country</label>
+                    <label>Phone</label>
                     <input
-                      type="text"
-                      name="country"
-                      value={formData.country}
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
                       onChange={handleChange}
                       required
                     />
                   </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Country</label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 
                 <div className="form-actions">
