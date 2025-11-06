@@ -392,7 +392,7 @@ const CheckoutPage = () => {
           
           <div className="order-summary">
             <h2>Order Summary</h2>
-            
+
             <div className="cart-items-summary">
               {cartItems.map(item => (
                 <div className="summary-item" key={item._id}>
@@ -400,16 +400,16 @@ const CheckoutPage = () => {
                     <img src={item.image} alt={item.name} />
                     <div>
                       <h4>{item.name}</h4>
-                      <p>Qty: {item.quantity}</p>
+                      <p>Qty: {item.qty || item.quantity || 1}</p>
                     </div>
                   </div>
                   <div className="item-price">
-                    ₹{(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * (item.qty || item.quantity || 1)).toFixed(2)}
                   </div>
                 </div>
               ))}
             </div>
-            
+
             <div className="summary-totals">
               <div className="summary-row">
                 <span>Subtotal</span>
@@ -417,11 +417,15 @@ const CheckoutPage = () => {
               </div>
               <div className="summary-row">
                 <span>Shipping</span>
-                <span>₹100.00</span>
+                <span>₹{cartTotal > 0 ? '100.00' : '0.00'}</span>
+              </div>
+              <div className="summary-row">
+                <span>Tax (18% GST)</span>
+                <span>₹{(cartTotal * 0.18).toFixed(2)}</span>
               </div>
               <div className="summary-row total">
                 <span>Total</span>
-                <span>₹{(cartTotal + 100).toFixed(2)}</span>
+                <span>₹{(cartTotal + (cartTotal > 0 ? 100 : 0) + (cartTotal * 0.18)).toFixed(2)}</span>
               </div>
             </div>
           </div>
