@@ -107,7 +107,29 @@ const CheckoutPage = () => {
       }
     }
   };
-  
+
+  // Check if user is logged in
+  if (!user) {
+    return (
+      <motion.div
+        className="checkout-page"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <div className="container">
+          <div className="login-required">
+            <h2>Login Required</h2>
+            <p>Please login to proceed with checkout.</p>
+            <Link to="/login" className="login-btn">
+              Login to Continue
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   if (cartItems.length === 0) {
     return (
       <motion.div 
